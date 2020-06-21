@@ -3,16 +3,12 @@ language: julia
 notifications:
   email: false
 julia:
-  - 1.0
   - 1.4
   - nightly
 os:
   - linux
-  - osx
-  - windows
 arch:
   - x64
-  - x86
 cache:
   directories:
     - ~/.julia/artifacts
@@ -20,12 +16,9 @@ jobs:
   fast_finish: true
   allow_failures:
     - julia: nightly
-  exclude:
-    - arch: x86
-      os: osx
   include:
     - stage: Documentation
-      julia: 1
+      julia: 1.4
       script: |
         julia --project=docs -e '
           using Pkg
