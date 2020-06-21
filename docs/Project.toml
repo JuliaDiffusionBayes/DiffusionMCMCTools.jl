@@ -1,0 +1,3 @@
+[deps]
+DiffusionMCMCTools = "b3cd2978-1ca6-4f16-819e-f44b3a471639"
+Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
