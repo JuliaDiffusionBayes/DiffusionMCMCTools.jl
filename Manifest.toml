@@ -201,7 +201,7 @@ version = "0.3.0"
 deps = ["DiffEqCallbacks", "DiffusionDefinition", "LinearAlgebra", "ObservationSchemes", "OrdinaryDiffEq", "Random", "RecursiveArrayTools", "StaticArrays", "Trajectories"]
 git-tree-sha1 = "f6e53955d4a2f1299711c5102f903cc0d1aa0488"
 repo-rev = "master"
-repo-url = "/home/rabid-koala/.julia/dev/GuidedProposals"
+repo-url = "https://github.com/JuliaDiffusionBayes/GuidedProposals.jl"
 uuid = "2d53f948-c29b-4abe-a473-2cf2f1798516"
 version = "0.1.0"
 
