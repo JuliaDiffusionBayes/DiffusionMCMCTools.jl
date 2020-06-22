@@ -26,6 +26,25 @@ diffusions via Guided Proposals.
 - `WW`: a vector of containers for sampled Wiener process
 - `Wnr`: a flag for sampling Wiener processes
 - `XX`: a vector of containers for a sampled process
+
+    SamplingUnit(
+        aux_laws, recording, x0_prior, tts, args;
+        aux_laws_blocking=aux_laws, artificial_noise=1e-11,
+        solver_choice_blocking=args
+    )
+
+Base constructor.
+
+# Arguments
+---
+- `aux_laws`:
+- `recording`:
+- `x0_prior`:
+- `tts`:
+- `args`:
+- `aux_laws_blocking`:
+- `artificial_noise`:
+- `solver_choice_blocking`:
 """
 struct SamplingUnit{TGP,TGPb,TW,TWn,TX}
     PP::Vector{TGP}
@@ -38,7 +57,7 @@ struct SamplingUnit{TGP,TGPb,TW,TWn,TX}
             aux_laws, recording, x0_prior, tts, args;
             aux_laws_blocking=aux_laws, artificial_noise=1e-11,
             solver_choice_blocking=args
-        ) where T
+        )
         PP = build_guid_prop(aux_laws, recording, tts, args)
         PPb = guid_prop_for_blocking(
             PP,

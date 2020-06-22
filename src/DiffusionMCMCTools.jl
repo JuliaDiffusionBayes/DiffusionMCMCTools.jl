@@ -10,6 +10,7 @@ module DiffusionMCMCTools
     OBS.var_parameter_names(P::DD.DiffusionProcess) = DD.var_parameter_names(P)
 
     include("sampling_unit.jl")
-    include("block_unit.jl")
-
+    include("sampling_pair.jl")
+    include("block.jl")
+    include("biblock.jl")
 end

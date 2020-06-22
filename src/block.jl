@@ -35,6 +35,16 @@ whether it is a terminal block or not.
 - `XX`: a vector of views into containers for a sampled process
 - `ll`: a placeholder for computed log-likelihood
 - `ll_history`: a history of computed log-likelihoods (useful for MCMC)
+
+
+    function Block(
+        u::SamplingUnit,
+        range::UnitRange{Int64},
+        last_block=false,
+        ll_hist_len=0
+    )
+
+Base constructor.
 """
 mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
     PP::TVIEW{TGP}

@@ -28,8 +28,10 @@ makedocs(;
     pages=[
         "Home" => "index.md",
         "User manual" => Any[
-            "Sampling unit.jl" => joinpath("manual", "sampling_unit.md"),
-            "Block.jl" => joinpath("manual", "block.md"),
+            "SamplingUnit" => joinpath("manual", "sampling_unit.md"),
+            "Block" => joinpath("manual", "block.md"),
+            "SamplingPair" => joinpath("manual", "sampling_pair.md"),
+            "BiBlock" => joinpath("manual", "biblock.md"),
         ],
         "Index" => "module_index.md",
     ],
