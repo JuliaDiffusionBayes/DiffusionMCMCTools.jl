@@ -1,6 +1,7 @@
 module DiffusionMCMCTools
 
     using DiffusionDefinition, ObservationSchemes, GuidedProposals
+    using Random, Distributions
 
     const DD = DiffusionDefinition
     const OBS = ObservationSchemes
@@ -13,4 +14,10 @@ module DiffusionMCMCTools
     include("sampling_pair.jl")
     include("block.jl")
     include("biblock.jl")
+
+    export SamplingUnit, draw_proposal_path!
+    export SamplingPair
+    export Block, find_W_for_X!, recompute_path!
+    export BiBlock, swap_paths!, swap_XX!, swap_WW!, swap_PP!
+    export accept_reject_proposal_path!, ll_of_accepted
 end

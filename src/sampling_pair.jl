@@ -16,7 +16,7 @@ A pairing of two `SamplingUnit`s and can be used for smoothing or inference
 problems.
 
     SamplingPair(
-        aux_laws, recording, x0_prior, tts, args;
+        aux_laws, recording, tts, args=tuple();
         aux_laws_blocking=aux_laws, artificial_noise=1e-11,
         solver_choice_blocking=args
     )
@@ -27,7 +27,6 @@ Base constructor.
 ---
 - `aux_laws`:
 - `recording`:
-- `x0_prior`:
 - `tts`:
 - `args`:
 - `aux_laws_blocking`:
@@ -39,12 +38,12 @@ struct SamplingPair{TGP,TGPb,TW,TWn,TX}
     u°::SamplingUnit{TGP,TGPb,TW,TWn,TX}
 
     function SamplingPair(
-            aux_laws, recording, x0_prior, tts, args;
+            aux_laws, recording, tts, args=tuple();
             aux_laws_blocking=aux_laws, artificial_noise=1e-11,
             solver_choice_blocking=args
         )
         u = SamplingUnit(
-            aux_laws, recording, x0_prior, tts, args;
+            aux_laws, recording, tts, args;
             aux_laws_blocking = aux_laws_blocking,
             artificial_noise = artificial_noise,
             solver_choice_blocking = solver_choice_blocking

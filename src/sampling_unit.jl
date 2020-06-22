@@ -28,7 +28,7 @@ diffusions via Guided Proposals.
 - `XX`: a vector of containers for a sampled process
 
     SamplingUnit(
-        aux_laws, recording, x0_prior, tts, args;
+        aux_laws, recording, tts, args=tuple();
         aux_laws_blocking=aux_laws, artificial_noise=1e-11,
         solver_choice_blocking=args
     )
@@ -39,7 +39,6 @@ Base constructor.
 ---
 - `aux_laws`:
 - `recording`:
-- `x0_prior`:
 - `tts`:
 - `args`:
 - `aux_laws_blocking`:
@@ -54,21 +53,21 @@ struct SamplingUnit{TGP,TGPb,TW,TWn,TX}
     XX::Vector{TX}
 
     function SamplingUnit(
-            aux_laws, recording, x0_prior, tts, args;
+            aux_laws, recording, tts, args=tuple();
             aux_laws_blocking=aux_laws, artificial_noise=1e-11,
             solver_choice_blocking=args
         )
-        PP = build_guid_prop(aux_laws, recording, tts, args)
+        PP = build_guid_prop(aux_laws, recording, tts, args...)
         PPb = guid_prop_for_blocking(
             PP,
             aux_laws_blocking,
             artificial_noise,
-            solver_choice_blocking
+            (args == tuple() ? solver_choice_blocking : args )...
         )
         XX, WW = trajectory(PP)
         Wnr = Wiener(PP)
 
-        init_paths!(P, WW, Wnr, XX, x0_prior)
+        init_paths!(PP, WW, Wnr, XX, recording.x0_prior)
         new{eltype(PP),eltype(PPb),eltype(WW),typeof(Wnr),eltype(XX)}(
             PP, PPb, WW, Wnr, XX
         )

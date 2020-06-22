@@ -91,6 +91,20 @@ function _draw_proposal_path_last_segment!(bb::BiBlock, y1)
 end
 
 """
+    accept_reject_proposal_path!(bb::BiBlock, mcmciter)
+
+Accept/reject decision of the Metropolis-Hastings algorithm for the step of path
+imputation.
+"""
+function accept_reject_proposal_path!(bb::BiBlock, mcmciter)
+    accepted = rand(Exponential(1.0)) > -(bb.b°.ll - bb.b.ll)
+    accepted && swap_paths!(bb)
+    set_accepted!(bb, mcmciter, accepted)
+    save_ll!(bb.b, mcmciter)
+    save_ll!(bb.b°, mcmciter)
+end
+
+"""
     set_accepted!(bb::BiBlock, i::Int, v)
 
 Commit the accept/reject decision `v` to acceptance history of BiBlock `b` at
@@ -144,20 +158,6 @@ function swap_PP!(bb::BiBlock)
     end
     # on a terminal block i.e. BiBlock{true} this simply makes no difference
     bb.b.P_last[1], bb.b°.P_last[1] = bb.b°.P_last[1], bb.b.P_last[1]
-end
-
-"""
-    accept_reject_proposal_path!(bb::BiBlock, mcmciter)
-
-Accept/reject decision of the Metropolis-Hastings algorithm for the step of path
-imputation.
-"""
-function accept_reject_proposal_path!(bb::BiBlock, mcmciter)
-    accepted = rand(Exponential(1.0)) > -(bb.b°.ll - bb.b.ll)
-    accepted && swap_paths!(bb)
-    set_accepted!(bb, mcmciter, accepted)
-    save_ll!(bb.b, mcmciter)
-    save_ll!(bb.b°, mcmciter)
 end
 
 """

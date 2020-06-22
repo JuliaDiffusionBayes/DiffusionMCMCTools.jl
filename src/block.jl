@@ -61,14 +61,14 @@ mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
             last_block=false,
             ll_hist_len=0
         ) where {TGP,TGPl,TW,TWn,TX}
-        PP = view(ws.PP, range[1]:(range[end]-!last_block)) # omit the last law
-        P_last = view(ws.PPb, range[end]:range[end])
+        PP = view(u.PP, range[1]:(range[end]-!last_block)) # omit the last law
+        P_last = view(u.PPb, range[end]:range[end])
 
-        XX = view(ws.XX, range)
-        WW = view(ws.WW, range)
+        XX = view(u.XX, range)
+        WW = view(u.WW, range)
 
         new{last_block,TGP,TGPl,TW,TWn,TX}(
-            PP, P_last, WW, ws.Wnr, XX, -Inf,
+            PP, P_last, WW, u.Wnr, XX, -Inf,
             Vector{Float64}(undef, ll_hist_len)
         )
     end
