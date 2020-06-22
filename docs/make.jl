@@ -27,6 +27,11 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "User manual" => Any[
+            "Sampling unit.jl" => joinpath("manual", "sampling_unit.md"),
+            "Block.jl" => joinpath("manual", "block.md"),
+        ],
+        "Index" => "module_index.md",
     ],
 )
 
