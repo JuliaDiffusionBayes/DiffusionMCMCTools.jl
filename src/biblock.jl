@@ -102,6 +102,7 @@ function accept_reject_proposal_path!(bb::BiBlock, mcmciter)
     set_accepted!(bb, mcmciter, accepted)
     save_ll!(bb.b, mcmciter)
     save_ll!(bb.b°, mcmciter)
+    accepted && swap_ll!(bb)
 end
 
 """
@@ -158,6 +159,15 @@ function swap_PP!(bb::BiBlock)
     end
     # on a terminal block i.e. BiBlock{true} this simply makes no difference
     bb.b.P_last[1], bb.b°.P_last[1] = bb.b°.P_last[1], bb.b.P_last[1]
+end
+
+"""
+    swap_ll!(bb::BiBlock)
+
+Swap `ll` containers between proposal-acceptance pair.
+"""
+function swap_ll!(bb::BiBlock)
+    bb.b.ll, bb.b°.ll = bb.b°.ll, bb.b.ll
 end
 
 """

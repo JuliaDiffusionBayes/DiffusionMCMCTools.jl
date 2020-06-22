@@ -32,6 +32,7 @@ DiffusionMCMCTools.swap_paths!(bb::DiffusionMCMCTools.BiBlock)
 DiffusionMCMCTools.swap_XX!(bb::DiffusionMCMCTools.BiBlock)
 DiffusionMCMCTools.swap_WW!(bb::DiffusionMCMCTools.BiBlock)
 DiffusionMCMCTools.swap_PP!(bb::DiffusionMCMCTools.BiBlock)
+DiffusionMCMCTools.swap_ll!(bb::DiffusionMCMCTools.BiBlock)
 ```
 
 #### Setting up a block
@@ -81,6 +82,7 @@ recording = build_recording(P, data, 0.0, KnownStartingPt(y1))
 plot(X, Val(:vs_time), size=(800, 300))
 scatter!(map(x->x.t, data), map(x->x.obs[1], data), label="data")
 ```
+![data](../assets/biblock/data.png)
 ## Inference algorithm
 ```julia
 function simple_smoothing(AuxLaw, recording, dt; ρ=0.5, num_steps=10^4)
@@ -115,7 +117,7 @@ end
 
 @load_diffusion FitzHughNagumoAux
 paths = simple_smoothing(
-    FitzHughNagumoAux, recording, 0.001; ρ=0.2, num_steps=10^4
+    FitzHughNagumoAux, recording, 0.001; ρ=0.96, num_steps=10^4
 )
 ```
 ## Results
@@ -145,6 +147,7 @@ plot!(X, Val(:vs_time), color=[col[5] col[4]], linewidth=[3 0.5], label=["underl
 scatter!(p, map(x->x.t, data), map(x->x.obs[1], data), label="data", markercolor=col[5])
 display(p)
 ```
+![smoothing](../assets/biblock/smoothing_results.png)
 
 
 # Example: smoothing with blocking
