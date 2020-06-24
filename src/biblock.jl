@@ -66,6 +66,7 @@ function draw_proposal_path!(bb::BiBlock) end
 function draw_proposal_path!(bb::BiBlock{false})
     success, bb.b°.ll = _draw_proposal_path!(bb)
     success || return false # anything?
+    y1 = bb.b°.XX[end-1].x[end]
     success, ll°_last = _draw_proposal_path_last_segment!(bb, y1)
     bb.b°.ll += ll°_last
     return success
@@ -84,7 +85,7 @@ function _draw_proposal_path!(bb::BiBlock)
 end
 
 function _draw_proposal_path_last_segment!(bb::BiBlock, y1)
-    success, ll° = rand!(
+    rand!(
         bb.b.P_last[1], bb.b°.XX[end], bb.b°.WW[end], bb.b.WW[end], bb.ρ, _LL,
         y1; Wnr=bb.b°.Wnr
     )
@@ -120,10 +121,8 @@ set_accepted!(bb::BiBlock, i::Int, v) = (bb.accpt_history[i] = v)
 Swap `XX` and `WW` containers between proposal-acceptance pair.
 """
 function swap_paths!(bb::BiBlock)
-    for i in eachindex(bb.b.XX)
-        bb.b.XX[i], bb.b°.XX[i] = bb.b°.XX[i], bb.b.XX[i]
-        bb.b.WW[i], bb.b°.WW[i] = bb.b°.WW[i], bb.b.WW[i]
-    end
+    swap_XX!(bb)
+    swap_WW!(bb)
 end
 
 """
@@ -179,6 +178,14 @@ function ll_of_accepted(bb::BiBlock, i)
     return (bb.accpt_history[i] ? bb.b°.ll_history[i] : bb.b.ll_history[i])
 end
 
+
+"""
+    accpt_rate(bb::BiBlock, range)
+
+Compute the acceptance rate over the `range` of MCMC accept/reject history.
+"""
+accpt_rate(bb::BiBlock, range) = sum(bb.accpt_history[range])/length(range)
+
 """
     GP.set_obs!(bb::BiBlock)
 
@@ -187,12 +194,12 @@ terminal block nothing is done.
 """
 function GP.set_obs!(bb::BiBlock) end
 
-function GP.set_obs!(bb::BiBlock{true})
-    set_obs!(bb.b.P_last, bb.b.XX[end].x[end])
-    set_obs!(bb.b°.P_last, bb.b.XX[end].x[end])
+function GP.set_obs!(bb::BiBlock{false})
+    set_obs!(bb.b.P_last[1], bb.b.XX[end].x[end])
+    set_obs!(bb.b°.P_last[1], bb.b.XX[end].x[end])
 end
 
-GP.set_obs!(bb::BiBlock{false}) = nothing
+GP.set_obs!(bb::BiBlock{true}) = nothing
 
 
 """
@@ -204,6 +211,7 @@ function GP.recompute_guiding_term!(bb::BiBlock)
     recompute_guiding_term!(bb.b)
     recompute_guiding_term!(bb.b°)
 end
+
 
 """
     find_W_for_X!(bb::BiBlock)

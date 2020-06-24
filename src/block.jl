@@ -98,7 +98,7 @@ Recompute the guiding term.
 function GP.recompute_guiding_term!(b::Block) end
 
 function GP.recompute_guiding_term!(b::Block{false})
-    recompute_guiding_term!(b.PP, b.P_last)
+    recompute_guiding_term!(b.PP, b.P_last[1])
 end
 
 function GP.recompute_guiding_term!(b::Block{true})
@@ -117,7 +117,7 @@ function find_W_for_X!(b::Block{false})
     for i in eachindex(b.PP)
         DD.invsolve!(b.XX[i], b.WW[i], b.PP[i])
     end
-    DD.invsolve!(b.XX[end], b.WW[end], b.P_last)
+    DD.invsolve!(b.XX[end], b.WW[end], b.P_last[1])
 end
 
 function find_W_for_X!(b::Block{true})
@@ -134,11 +134,10 @@ Compute the log-likelihood evaluated at a sampled path.
 function GP.loglikhd(b::Block) end
 
 GP.loglikhd(b::Block{false}) = (
-    loglikhd(b.PP, b.XX) + loglikhd(b.P_last, b.XX[end])
+    loglikhd(b.PP, b.XX) + loglikhd(b.P_last[1], b.XX[end])
 )
 
 GP.loglikhd(b::Block{true}) = loglikhd(b.PP, b.XX)
-
 
 """
     recompute_path!(b::Block, WW=b.WW; skip=0)

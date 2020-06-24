@@ -47,6 +47,7 @@ DiffusionMCMCTools.find_W_for_X!(bb::DiffusionMCMCTools.BiBlock)
 ----
 ```@docs
 DiffusionMCMCTools.ll_of_accepted(bb::DiffusionMCMCTools.BiBlock, i)
+DiffusionMCMCTools.accpt_rate(bb::DiffusionMCMCTools.BiBlock, range)
 ```
 
 # Example: smoothing with no blocking
@@ -83,7 +84,8 @@ plot(X, Val(:vs_time), size=(800, 300))
 scatter!(map(x->x.t, data), map(x->x.obs[1], data), label="data")
 ```
 ![data](../assets/biblock/data.png)
-## Inference algorithm
+
+## The algorithm
 ```julia
 function simple_smoothing(AuxLaw, recording, dt; ρ=0.5, num_steps=10^4)
     tts = OBS.setup_time_grids(recording, dt, standard_guid_prop_time_transf)
@@ -97,7 +99,7 @@ function simple_smoothing(AuxLaw, recording, dt; ρ=0.5, num_steps=10^4)
     # MCMC
     for i in 1:num_steps
         # impute a path
-        ll° = draw_proposal_path!(bb)
+        draw_proposal_path!(bb)
         # Metropolis–Hastings accept/reject step
         accept_reject_proposal_path!(bb, i)
 
@@ -120,6 +122,7 @@ paths = simple_smoothing(
     FitzHughNagumoAux, recording, 0.001; ρ=0.96, num_steps=10^4
 )
 ```
+
 ## Results
 ```julia
 function glue_paths(XX)
@@ -152,7 +155,73 @@ display(p)
 
 # Example: smoothing with blocking
 ----
+## Set-up
+Same as above
 
+## The algorithm
+```julia
+function simple_smoothing_with_blocking(
+        AuxLaw, recording, dt, AuxLawBlocking, block_layout;
+        ρ=0.5, num_steps=10^4
+    )
+    tts = OBS.setup_time_grids(recording, dt, standard_guid_prop_time_transf)
+    # this object contains containers
+    sp = SamplingPair(AuxLaw, recording, tts)
+    # and this has pointers to containers and facilitates actual sampling
+    blocks = [
+        [
+            BiBlock(sp, br, ρ, i==length(block_ranges), num_steps)
+            for (i,br) in enumerate(block_ranges)
+        ] for block_ranges in block_layout
+    ]
+
+    paths = []
+
+    N = length(blocks)
+    # MCMC
+    for i in 1:num_steps
+        for B in blocks
+            # freeze terminal points of blocks to be artificial observations
+            GP.set_obs!.(B)
+            # recompute the guiding term only on the "accepted" laws `bb.b.PP`
+            (bb->recompute_guiding_term!(bb.b)).(B)
+            # recompute the Wiener path
+            find_W_for_X!.(B)
+            # re-evaluate the log-likelihood
+            ( bb->(bb.b.ll = loglikhd(bb.b)) ).(B)
+            # impute a path
+            draw_proposal_path!.(B)
+            # Metropolis–Hastings accept/reject step
+            accept_reject_proposal_path!.(B, i)
+
+            # progress message
+            if i % 100 == 0
+                println(
+                    "$i. ll=$(ll_of_accepted.(B, i)), acceptance rate: ",
+                    "$( map(bb->accpt_rate(bb, (i-99):i), B) )"
+                )
+            end
+        end
+
+        # save intermediate path for plotting
+        i % 400 == 0 && append!(paths, [deepcopy(sp.u.XX)])
+    end
+    paths
+end
+```
+
+## Results
+```julia
+@inline DD.nonhypo(x, P::FitzHughNagumo) = x[SVector{1,Int64}(2)]
+@inline DD.nonhypo_σ(t::Float64, x, P::FitzHughNagumo) = SMatrix{1,1,Float64}(P.σ)
+paths = simple_smoothing_with_blocking(
+    FitzHughNagumoAux, recording, 0.001, FitzHughNagumoAux,
+    [[1:25,26:75,76:100],[1:50, 51:100]];
+    ρ=0.96, num_steps=10^4
+)
+```
+Same plotting routines as above yield:
+![smoothing_with_blocking_results](../assets/biblock/smoothing_with_blocking_results.png)
 
 # Example: inference with no blocking
 ----
