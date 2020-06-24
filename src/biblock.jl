@@ -8,6 +8,14 @@
 
 ===============================================================================#
 
+
+
+#===============================================================================
+
+        DEFINITION
+
+===============================================================================#
+
 """
     mutable struct BiBlock{L,TGP,TGPl,TW,TWn,TX}
         b::Block{L,TGP,TGPl,TW,TWn,TX}
@@ -54,6 +62,12 @@ mutable struct BiBlock{L,TGP,TGPl,TW,TWn,TX}
     end
 end
 
+#===============================================================================
+
+        IMPUTATION
+
+===============================================================================#
+
 """
     draw_proposal_path!(bb::BiBlock)
 
@@ -91,6 +105,13 @@ function _draw_proposal_path_last_segment!(bb::BiBlock, y1)
     )
 end
 
+
+#===============================================================================
+
+        ACCEPT/REJECT DECISION
+
+===============================================================================#
+
 """
     accept_reject_proposal_path!(bb::BiBlock, mcmciter)
 
@@ -114,6 +135,11 @@ the position `i`.
 """
 set_accepted!(bb::BiBlock, i::Int, v) = (bb.accpt_history[i] = v)
 
+#===============================================================================
+
+        SWAPS
+
+===============================================================================#
 
 """
     swap_paths!(bb::BiBlock)
@@ -169,6 +195,12 @@ function swap_ll!(bb::BiBlock)
     bb.b.ll, bb.b°.ll = bb.b°.ll, bb.b.ll
 end
 
+#===============================================================================
+
+        UTILITY
+
+===============================================================================#
+
 """
     ll_of_accepted(bb::BiBlock, i)
 
@@ -185,6 +217,12 @@ end
 Compute the acceptance rate over the `range` of MCMC accept/reject history.
 """
 accpt_rate(bb::BiBlock, range) = sum(bb.accpt_history[range])/length(range)
+
+#===============================================================================
+
+        SETTING ARTIFICIAL OBSERVATIONS
+
+===============================================================================#
 
 """
     GP.set_obs!(bb::BiBlock)
@@ -220,3 +258,142 @@ Find the Wiener process `bb.b.WW` that reconstructs path `bb.b.XX` under the
 accepted law `bb.b.PP` (possibly including `bb.b.P_last`).
 """
 find_W_for_X!(bb::BiBlock) = find_W_for_X!(bb.b)
+
+#===============================================================================
+
+        SETTING PARAMETERS
+
+===============================================================================#
+
+"""
+    is_critical_update(bb::BiBlock, pnames)
+
+Verify whether the update characterized by a list of parameter names stored in
+`pnames` is `critical` in a sense of prompting for recomputation of the guiding
+term.
+"""
+GP.is_critical_update(bb::BiBlock, pnames) = GP.is_critical_update(
+    bb.b.PP, pnames.θ_local_aux, pnames.θ_local_obs
+)
+
+
+"""
+    set_proposal_law!(
+        bb::BiBlock,
+        θ°,
+        pnames,
+        critical_change=GP.is_critical_update(bb, pnames),
+        skip=0
+    )
+
+Set the parameters in `bb.b°.PP` and `bb.b°.P_last` to `θ°` and make sure that
+all other parameters are shared with `bb.b.PP` and `bb.b.P_last`. Recompute the
+guiding term if needed, and then, compute the proposal trajectory `bb.b°.XX` for
+the proposal point `θ°`.
+"""
+function set_proposal_law!(
+        bb::BiBlock,
+        θ°,
+        pnames,
+        critical_change=GP.is_critical_update(bb, pnames),
+        skip=0
+    )
+    critical_change = DD.set_parameters!(bb, θ°, pnames, critical_change)
+    critical_change && recompute_guiding_term!(bb.b°)
+    recompute_path!(bb.b°, bb.b.WW; skip=skip)
+end
+
+
+"""
+    DD.set_parameters!(
+        bb::BiBlock,
+        θ°,
+        pnames,
+        critical_change=is_critical_update(bb, pnames)
+    )
+
+Set the parameters in `bb.b°.PP` and `bb.b°.P_last` to `θ°` and make sure that
+all other parameters are shared with `bb.b.PP` and `bb.b.P_last`.
+"""
+function DD.set_parameters!(
+        bb::BiBlock,
+        θ°,
+        pnames,
+        critical_change=GP.is_critical_update(bb, pnames)
+    )
+    GP.equalize_obs_params!(bb) && (critical_change = true)
+    GP.equalize_law_params!(bb, pnames) && (critical_change = true)
+    DD.set_parameters!(bb.b°.PP, θ°, pnames.PP)
+    DD.set_parameters!(bb.b°.P_last, θ°, pnames.P_last)
+    DD.set_parameters!(bb.b°.P_excl, θ°, pnames.P_excl)
+    critical_change
+end
+
+function DD.set_parameters!(PP::AbstractArray{<:GuidProp}, θ°, pnames)
+    DD.set_parameters!(PP, θ°, pnames.updt, pnames.updt_aux, pnames.updt_obs)
+end
+
+"""
+    GP.equalize_obs_params!(bb::BiBlock)
+
+Make sure that in the corresponding pairs of `GuidProp` structs of both `bb.b`
+and `bb.b°`, the parameters `θ` of the `obs` fields are the same. If not, then
+set the ones in `bb.b°` to be the same as the ones in `bb.b`.
+"""
+function GP.equalize_obs_params!(bb::BiBlock)
+    # equalization of observations that does not matter for this update, but
+    # will once the blocks switch...
+    GP.equalize_obs_params!(bb.b.P_excl, bb.b°.P_excl)
+
+    # no equalization on P_last;
+
+    # and finally equalization that matters currently, may yield critical change
+    GP.equalize_obs_params!(bb.b.PP, bb.b°.PP)
+end
+
+"""
+    GP.equalize_law_params!(bb::BiBlock, pnames)
+
+Make sure that in the corresponding pairs of `GuidProp` structs of both `bb.b`
+and `bb.b°`, the `variable` parameters of each law are the same. If not, then
+set the ones in `bb.b°` to be the same as the ones in `bb.b`.
+"""
+function GP.equalize_law_params!(bb::BiBlock, pnames) end
+
+function GP.equalize_law_params!(bb::BiBlock{true}, pnames)
+    _eql_PP!(bb.b.PP, bb.b°.PP, pnames.PP.var, pnames.PP.var_aux)
+end
+
+function GP.equalize_law_params!(bb::BiBlock{false}, pnames)
+    critical_change = _eql_PP!(
+        bb.b.PP, bb.b°.PP, pnames.PP.var, pnames.PP.var_aux
+    )
+
+    _eql_PP!(
+        bb.b.P_last, bb.b°.P_last, pnames.P_last.var, pnames.P_last.var_aux
+    ) && (critical_change = true)
+
+    # this is just not needed now, but will be for the next blocks
+    _eql_PP!(
+        bb.b.P_excl, bb.b°.P_excl, pnames.P_excl.var, pnames.P_excl.var_aux
+    )
+
+    critical_change
+end
+
+"""
+    _eql_PP!(PP, PP°, var_p_names, var_p_aux_names)
+
+Go through all `GuidProp` structs in  `PP` and `PP°` and make sure that the
+parameters listed in `var_p_names` and `var_p_aux_names` agree. Equalize them if
+they do not. `var_p_names` should list all parameter names from the target law
+and `var_p_aux_names` should list all parameters from the auxiliary law.
+"""
+function _eql_PP!(PP, PP°, var_p_names, var_p_aux_names)
+    if !DD.same_entries(bb.b.PP, bb.b°.PP, var_p_names)
+        GP.equalize_law_params!(
+            bb.b.PP, bb.b°.PP, var_p_names, var_p_aux_names
+        ) && return true
+    end
+    false
+end

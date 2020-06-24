@@ -8,6 +8,9 @@ module DiffusionMCMCTools
     const GP = GuidedProposals
     const _LL = Val(:ll)
 
+    #temporary
+    import GuidedProposals: is_critical_update
+
     OBS.var_parameter_names(P::DD.DiffusionProcess) = DD.var_parameter_names(P)
 
     include("sampling_unit.jl")

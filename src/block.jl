@@ -48,6 +48,7 @@ Base constructor.
 """
 mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
     PP::TVIEW{TGP}
+    P_excl::TVIEW{TGP}
     P_last::TVIEW{TGPl} # view to a single element
     WW::TVIEW{TW}
     Wnr::TWn
@@ -62,13 +63,14 @@ mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
             ll_hist_len=0
         ) where {TGP,TGPl,TW,TWn,TX}
         PP = view(u.PP, range[1]:(range[end]-!last_block)) # omit the last law
+        P_excl = view(u.PP, (range[end]+last_block):range[end])
         P_last = view(u.PPb, range[end]:range[end])
 
         XX = view(u.XX, range)
         WW = view(u.WW, range)
 
         new{last_block,TGP,TGPl,TW,TWn,TX}(
-            PP, P_last, WW, u.Wnr, XX, -Inf,
+            PP, P_excl, P_last, WW, u.Wnr, XX, -Inf,
             Vector{Float64}(undef, ll_hist_len)
         )
     end

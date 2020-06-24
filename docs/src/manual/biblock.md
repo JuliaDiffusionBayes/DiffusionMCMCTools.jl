@@ -50,6 +50,18 @@ DiffusionMCMCTools.ll_of_accepted(bb::DiffusionMCMCTools.BiBlock, i)
 DiffusionMCMCTools.accpt_rate(bb::DiffusionMCMCTools.BiBlock, range)
 ```
 
+#### Setting parameters
+----
+```@docs
+DiffusionMCMCTools.set_proposal_law!(
+      bb::DiffusionMCMCTools.BiBlock,
+      θ°,
+      pnames,
+      critical_change=DiffusionMCMCTools.is_critical_update(bb, pnames),
+      skip=0
+  )
+```
+
 # Example: smoothing with no blocking
 ----------
 ## Set-up
