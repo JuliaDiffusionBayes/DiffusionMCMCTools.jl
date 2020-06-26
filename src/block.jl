@@ -164,8 +164,8 @@ function recompute_path!(b::Block{true}, WW=b.WW; skip=0)
 end
 
 function _recompute_path!(b::Block, WW=b.WW; skip=0)
-    ll_tot = loglikhd_obs(b.PP[1], y1)
     y1 = b.XX[1].x[1]
+    ll_tot = loglikhd_obs(b.PP[1], y1)
     for i in 1:length(b.PP)
         success, ll = GP.solve_and_ll!(b.XX[i], WW[i], b.PP[i], y1; skip=skip)
         success || (b.ll = ll; return false)

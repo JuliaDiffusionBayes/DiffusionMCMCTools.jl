@@ -178,13 +178,24 @@ end
 
 Swap `PP` containers (including PP_last) between proposal-acceptance pair.
 """
-function swap_PP!(bb::BiBlock)
+function swap_PP!(bb::BiBlock) end
+
+function swap_PP!(bb::BiBlock{true})
+    _swap_PP!(bb)
+end
+
+function swap_PP!(bb::BiBlock{false})
+    _swap_PP!(bb)
+    bb.b.P_last[1], bb.b°.P_last[1] = bb.b°.P_last[1], bb.b.P_last[1]
+    bb.b.P_excl[1], bb.b°.P_excl[1] = bb.b°.P_excl[1], bb.b.P_excl[1]
+end
+
+function _swap_PP!(bb::BiBlock)
     for i in eachindex(bb.b.PP)
         bb.b.PP[i], bb.b°.PP[i] = bb.b°.PP[i], bb.b.PP[i]
     end
-    # on a terminal block i.e. BiBlock{true} this simply makes no difference
-    bb.b.P_last[1], bb.b°.P_last[1] = bb.b°.P_last[1], bb.b.P_last[1]
 end
+
 
 """
     swap_ll!(bb::BiBlock)
@@ -390,9 +401,9 @@ they do not. `var_p_names` should list all parameter names from the target law
 and `var_p_aux_names` should list all parameters from the auxiliary law.
 """
 function _eql_PP!(PP, PP°, var_p_names, var_p_aux_names)
-    if !DD.same_entries(bb.b.PP, bb.b°.PP, var_p_names)
+    if !DD.same_entries(PP, PP°, var_p_names)
         GP.equalize_law_params!(
-            bb.b.PP, bb.b°.PP, var_p_names, var_p_aux_names
+            PP, PP°, var_p_names, var_p_aux_names
         ) && return true
     end
     false

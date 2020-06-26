@@ -21,6 +21,7 @@ module DiffusionMCMCTools
     export SamplingUnit, draw_proposal_path!
     export SamplingPair
     export Block, find_W_for_X!, recompute_path!
-    export BiBlock, swap_paths!, swap_XX!, swap_WW!, swap_PP!
+    export BiBlock, swap_paths!, swap_XX!, swap_WW!, swap_PP!, set_proposal_law!
+    export save_ll!, swap_ll!
     export accept_reject_proposal_path!, ll_of_accepted, accpt_rate
 end
