@@ -64,7 +64,7 @@ mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
         ) where {TGP,TGPl,TW,TWn,TX}
         PP = view(u.PP, range[1]:(range[end]-!last_block)) # omit the last law
         P_excl = view(u.PP, (range[end]+last_block):range[end])
-        P_last = view(u.PPb, range[end]:range[end])
+        P_last = view(u.PPb, (range[end]+last_block):range[end])
 
         XX = view(u.XX, range)
         WW = view(u.WW, range)
