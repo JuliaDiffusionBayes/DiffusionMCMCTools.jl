@@ -12,5 +12,6 @@ DiffusionMCMCTools.save_ll!(b::DiffusionMCMCTools.Block, i::Int)
 DiffusionMCMCTools.recompute_guiding_term!(b::DiffusionMCMCTools.Block)
 DiffusionMCMCTools.find_W_for_X!(b::DiffusionMCMCTools.Block)
 DiffusionMCMCTools.loglikhd(b::DiffusionMCMCTools.Block)
+DiffusionMCMCTools.loglikhd!(b::DiffusionMCMCTools.Block)
 DiffusionMCMCTools.recompute_path!(b::DiffusionMCMCTools.Block, WW=b.WW; skip=0)
 ```

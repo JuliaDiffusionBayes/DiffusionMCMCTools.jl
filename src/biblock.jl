@@ -83,12 +83,12 @@ function draw_proposal_path!(bb::BiBlock{false})
     y1 = bb.b°.XX[end-1].x[end]
     success, ll°_last = _draw_proposal_path_last_segment!(bb, y1)
     bb.b°.ll += ll°_last
-    return success
+    success
 end
 
 function draw_proposal_path!(bb::BiBlock{true})
     success, bb.b°.ll = _draw_proposal_path!(bb)
-    return success
+    success
 end
 
 function _draw_proposal_path!(bb::BiBlock)
@@ -122,8 +122,7 @@ function accept_reject_proposal_path!(bb::BiBlock, mcmciter)
     accepted = rand(Exponential(1.0)) > -(bb.b°.ll - bb.b.ll)
     accepted && swap_paths!(bb)
     set_accepted!(bb, mcmciter, accepted)
-    save_ll!(bb.b, mcmciter)
-    save_ll!(bb.b°, mcmciter)
+    save_ll!(bb, mcmciter)
     accepted && swap_ll!(bb)
 end
 
@@ -188,6 +187,9 @@ function swap_PP!(bb::BiBlock{false})
     _swap_PP!(bb)
     bb.b.P_last[1], bb.b°.P_last[1] = bb.b°.P_last[1], bb.b.P_last[1]
     bb.b.P_excl[1], bb.b°.P_excl[1] = bb.b°.P_excl[1], bb.b.P_excl[1]
+    for i in eachindex(bb.b.Pb_excl)
+        bb.b.Pb_excl[i], bb.b°.Pb_excl[i] = bb.b°.Pb_excl[i], bb.b.Pb_excl[i]
+    end
 end
 
 function _swap_PP!(bb::BiBlock)
@@ -228,6 +230,33 @@ end
 Compute the acceptance rate over the `range` of MCMC accept/reject history.
 """
 accpt_rate(bb::BiBlock, range) = sum(bb.accpt_history[range])/length(range)
+
+"""
+    loglikhd!(b::BiBlock)
+
+Compute the log-likelihood for the accepted block, evaluated at a sampled path
+and store the result in an internal field `ll`.
+"""
+loglikhd!(bb::BiBlock) = loglikhd!(bb.b)
+
+"""
+    loglikhd°!(b::BiBlock)
+
+Compute the log-likelihood for the proposal block, evaluated at a sampled path
+and store the result in an internal field `ll`.
+"""
+loglikhd°!(bb::BiBlock) = loglikhd!(bb.b°)
+
+"""
+    save_ll!(bb::BiBlock, i::Int)
+
+Commit the current proposal and accepted log-likelihood fields `ll` to history,
+at index `i`.
+"""
+function save_ll!(bb::BiBlock, i::Int)
+    save_ll!(bb.b, i)
+    save_ll!(bb.b°, i)
+end
 
 #===============================================================================
 
@@ -293,7 +322,7 @@ GP.is_critical_update(bb::BiBlock, pnames) = GP.is_critical_update(
         bb::BiBlock,
         θ°,
         pnames,
-        critical_change=GP.is_critical_update(bb, pnames),
+        critical_change=GP.is_critical_update(bb, pnames);
         skip=0
     )
 
@@ -306,7 +335,7 @@ function set_proposal_law!(
         bb::BiBlock,
         θ°,
         pnames,
-        critical_change=GP.is_critical_update(bb, pnames),
+        critical_change=GP.is_critical_update(bb, pnames);
         skip=0
     )
     critical_change = DD.set_parameters!(bb, θ°, pnames, critical_change)
@@ -337,6 +366,7 @@ function DD.set_parameters!(
     DD.set_parameters!(bb.b°.PP, θ°, pnames.PP)
     DD.set_parameters!(bb.b°.P_last, θ°, pnames.P_last)
     DD.set_parameters!(bb.b°.P_excl, θ°, pnames.P_excl)
+    DD.set_parameters!(bb.b°.Pb_excl, θ°, pnames.Pb_excl)
     critical_change
 end
 
@@ -356,7 +386,7 @@ function GP.equalize_obs_params!(bb::BiBlock)
     # will once the blocks switch...
     GP.equalize_obs_params!(bb.b.P_excl, bb.b°.P_excl)
 
-    # no equalization on P_last;
+    # no equalization on P_last or Pb_excl
 
     # and finally equalization that matters currently, may yield critical change
     GP.equalize_obs_params!(bb.b.PP, bb.b°.PP)
@@ -387,6 +417,9 @@ function GP.equalize_law_params!(bb::BiBlock{false}, pnames)
     # this is just not needed now, but will be for the next blocks
     _eql_PP!(
         bb.b.P_excl, bb.b°.P_excl, pnames.P_excl.var, pnames.P_excl.var_aux
+    )
+    _eql_PP!(
+        bb.b.Pb_excl, bb.b°.Pb_excl, pnames.Pb_excl.var, pnames.Pb_excl.var_aux
     )
 
     critical_change

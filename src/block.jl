@@ -50,6 +50,7 @@ mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
     PP::TVIEW{TGP}
     P_excl::TVIEW{TGP}
     P_last::TVIEW{TGPl} # view to a single element
+    Pb_excl::TVIEW{TGPl}
     WW::TVIEW{TW}
     Wnr::TWn
     XX::TVIEW{TX}
@@ -65,12 +66,13 @@ mutable struct Block{L,TGP,TGPl,TW,TWn,TX}
         PP = view(u.PP, range[1]:(range[end]-!last_block)) # omit the last law
         P_excl = view(u.PP, (range[end]+last_block):range[end])
         P_last = view(u.PPb, (range[end]+last_block):range[end])
+        Pb_excl = view(u.PPb, range[1]:(range[end]-!last_block))
 
         XX = view(u.XX, range)
         WW = view(u.WW, range)
 
         new{last_block,TGP,TGPl,TW,TWn,TX}(
-            PP, P_excl, P_last, WW, u.Wnr, XX, -Inf,
+            PP, P_excl, P_last, Pb_excl, WW, u.Wnr, XX, -Inf,
             Vector{Float64}(undef, ll_hist_len)
         )
     end
@@ -140,6 +142,14 @@ GP.loglikhd(b::Block{false}) = (
 )
 
 GP.loglikhd(b::Block{true}) = loglikhd(b.PP, b.XX)
+
+"""
+    loglikhd!(b::Block)
+
+Compute the log-likelihood evaluated at a sampled path and store the result in
+an internal field `ll`.
+"""
+loglikhd!(b::Block) = (b.ll = loglikhd(b))
 
 """
     recompute_path!(b::Block, WW=b.WW; skip=0)

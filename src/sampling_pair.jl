@@ -12,7 +12,7 @@
         u°::SamplingUnit{TGP,TGPb,TW,TWn,TX}
     end
 
-A pairing of two `SamplingUnit`s and can be used for smoothing or inference
+A pairing of two `SamplingUnit`s, can be used for smoothing or inference
 problems.
 
     SamplingPair(

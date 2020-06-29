@@ -43,23 +43,27 @@ DiffusionMCMCTools.recompute_guiding_term!(bb::DiffusionMCMCTools.BiBlock)
 DiffusionMCMCTools.find_W_for_X!(bb::DiffusionMCMCTools.BiBlock)
 ```
 
+#### Setting parameters
+----
+```@docs
+DiffusionMCMCTools.set_proposal_law!(
+    bb::DiffusionMCMCTools.BiBlock,
+    θ°,
+    pnames,
+    critical_change=DiffusionMCMCTools.is_critical_update(bb, pnames),
+    skip=0
+)
+
+```
+
 #### Utility
 ----
 ```@docs
 DiffusionMCMCTools.ll_of_accepted(bb::DiffusionMCMCTools.BiBlock, i)
 DiffusionMCMCTools.accpt_rate(bb::DiffusionMCMCTools.BiBlock, range)
-```
-
-#### Setting parameters
-----
-```@docs
-DiffusionMCMCTools.set_proposal_law!(
-      bb::DiffusionMCMCTools.BiBlock,
-      θ°,
-      pnames,
-      critical_change=DiffusionMCMCTools.is_critical_update(bb, pnames),
-      skip=0
-  )
+DiffusionMCMCTools.loglikhd!(bb::DiffusionMCMCTools.BiBlock)
+DiffusionMCMCTools.loglikhd°!(bb::DiffusionMCMCTools.BiBlock)
+DiffusionMCMCTools.save_ll!(bb::DiffusionMCMCTools.BiBlock, i::Int)
 ```
 
 # Example: smoothing with no blocking
@@ -105,7 +109,7 @@ function simple_smoothing(AuxLaw, recording, dt; ρ=0.5, num_steps=10^4)
     sp = SamplingPair(AuxLaw, recording, tts)
     # and this has pointers to containers and facilitates actual sampling
     bb = BiBlock(sp, 1:length(recording.obs), ρ, true, num_steps)
-    bb.b.ll = loglikhd(bb.b)
+    loglikhd!(bb)
     paths = []
 
     # MCMC
@@ -200,7 +204,7 @@ function simple_smoothing_with_blocking(
             # recompute the Wiener path
             find_W_for_X!.(B)
             # re-evaluate the log-likelihood
-            ( bb->(bb.b.ll = loglikhd(bb.b)) ).(B)
+            loglikhd!.(B)
             # impute a path
             draw_proposal_path!.(B)
             # Metropolis–Hastings accept/reject step
@@ -270,6 +274,7 @@ function simple_name_structure(pname::Symbol, num_obs)
         PP = _build_struct(num_obs, (1=>pname)),
         P_last = _build_struct(0), # was num_obs
         P_excl = _build_struct(0),
+        Pb_excl = _build_struct(num_obs, (1=>pname)),
     )
 end
 #↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑
@@ -278,8 +283,7 @@ function accept_reject_proposal_param!(bb, mcmciter, θ, θ°)
     accepted = rand(Exponential(1.0)) > -(bb.b°.ll - bb.b.ll)
     accepted && swap_XX!(bb)
     accepted && swap_PP!(bb)
-    save_ll!(bb.b, mcmciter)
-    save_ll!(bb.b°, mcmciter)
+    save_ll!(bb, mcmciter)
     accepted && swap_ll!(bb)
     accepted, copy(accepted ? θ° : θ)
 end
@@ -302,7 +306,7 @@ function simple_inference(AuxLaw, recording, dt, _θ; ϵ=0.3, ρ=0.5, num_steps=
     bb = BiBlock(sp, 1:num_obs, ρ, true, num_steps)
     name_struct = simple_name_structure(pname, num_obs)
 
-    bb.b.ll = loglikhd(bb.b)
+    loglikhd!(bb)
     paths = []
 
     θθ = [θ]
@@ -359,6 +363,7 @@ function simple_name_structure_not_last(pname::Symbol, num_obs)
         PP = _build_struct(num_obs-1, (1=>pname)),
         P_last = _build_struct(1, (1=>pname)),
         P_excl = _build_struct(1, (1=>pname)),
+        Pb_excl = _build_struct(num_obs-1, (1=>pname)),
     )
 end
 
@@ -422,7 +427,7 @@ function simple_inference_with_blocking(
             GP.set_obs!.(B)
             (bb->recompute_guiding_term!(bb.b)).(B)
             find_W_for_X!.(B)
-            ( bb->(bb.b.ll = loglikhd(bb.b)) ).(B)
+            loglikhd!.(B)
             draw_proposal_path!.(B)
             accept_reject_proposal_path!.(B, i)
 

@@ -1,0 +1,5 @@
+# BlockEnsemble
+***
+```@docs
+DiffusionMCMCTools.BlockEnsemble
+```
