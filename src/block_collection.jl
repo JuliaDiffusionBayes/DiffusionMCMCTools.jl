@@ -189,6 +189,46 @@ end
 
 ===============================================================================#
 
+"""
+    GP.set_obs!(bc::BlockCollection)
+
+Freeze an artificial observation at the terminal point of each block. For a
+terminal block nothing is done.
+"""
+GP.set_obs!(bc::BlockCollection) = set_obs!.(bc.blocks)
+
+"""
+    GP.recompute_guiding_term!(bc::BlockCollection, [::Val{:_only}])
+
+For each block in the collection recompute the guiding terms of both the
+proposal and the accepted laws. If an additional flag `Val(:P_only)` is passed,
+then recomputes the guiding term on accepted law only. If `Val(:P°_only)`, then
+recomputes for the proposal law only.
+"""
+function GP.recompute_guiding_term!(bc::BlockCollection)
+    recompute_guiding_term!.(bc.blocks)
+end
+
+function GP.recompute_guiding_term!(bc::BlockCollection, ::Val{:P_only})
+    _rgt_only_P!.(bc.blocks)
+end
+
+function GP.recompute_guiding_term!(bc::BlockCollection, ::Val{:P°_only})
+    _rgt_only_P°!.(bc.blocks)
+end
+
+_rgt_only_P!(bb::BiBlock) = recompute_guiding_term!(bb.b)
+_rgt_only_P°!(bb::BiBlock) = recompute_guiding_term!(bb.b°)
+
+"""
+    find_W_for_X!(bc::BlockCollection)
+
+For each block find the Wiener process `bb.b.WW` that reconstructs the path
+`bb.b.XX` under the accepted law `bb.b.PP` (possibly including `bb.b.P_last`).
+"""
+find_W_for_X!(bc::BlockCollection) = find_W_for_X!.(bc.blocks)
+
+
 #===============================================================================
 
         SETTING PARAMETERS

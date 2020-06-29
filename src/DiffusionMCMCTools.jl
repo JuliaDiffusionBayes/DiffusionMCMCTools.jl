@@ -7,6 +7,7 @@ module DiffusionMCMCTools
     const OBS = ObservationSchemes
     const GP = GuidedProposals
     const _LL = Val(:ll)
+    const _P_ONLY = Val(:P_only)
 
     #temporary
     import GuidedProposals: is_critical_update

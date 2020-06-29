@@ -211,7 +211,7 @@ struct ParamNamesBlock{N1,N2}
         i1, i2 = _idx_split(b)
 
         PP = ParamNamesUnit(b.PP, θnames, pdep, odeps[i1])
-        P_last = ParamNamesUnit(b.P_last, θnames, pdep, [])
+        P_last = ParamNamesUnit(b.P_last, θnames, pdep, [tuple() for _ in i2])
         P_excl = ParamNamesUnit(b.P_excl, θnames, pdep, odeps[i2])
         Pb_excl = ParamNamesUnit(b.Pb_excl, θnames, pdep, [tuple() for _ in i1])
         N1, N2 = tuple_lengths(PP)
@@ -221,7 +221,7 @@ end
 
 function _idx_split(b::Block{false})
     bidx = first(b.PP.indices) # PP is a subarray
-    bidx[1:end-1], [bidx[end]]
+    bidx, [bidx[end]+1]
 end
 
 function _idx_split(b::Block{true})
