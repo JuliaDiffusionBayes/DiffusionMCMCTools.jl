@@ -267,15 +267,22 @@ algorithm. It stores lists of parameters that are supposed to be updated at
 various stages of the call to a function `set_proposal_law!`, which sets the
 proposal parameter `θ°` inside the proposal laws.
 
-    ParamNamesAllObs(be::BlockEnsemble)
+    ParamNamesAllObs(be::BlockEnsemble, θnames, all_obs)
 
 Base constructor.
 """
 struct ParamNamesAllObs{T}
     recordings::Vector{T}
 
-    function ParamNamesAllObs(be::BlockEnsemble)
-        recordings = ParamNamesRecording.(be.recordings)
+    function ParamNamesAllObs(be::BlockEnsemble, θnames, all_obs)
+        recordings = map(1:length(be.recordings)) do i
+            ParamNamesRecording(
+                be.recordings[i],
+                θnames,
+                all_obs.param_depend_rev[i],
+                all_obs.obs_depend_rev[i]
+            )
+        end
         new{eltype(recordings)}(recordings)
     end
 end

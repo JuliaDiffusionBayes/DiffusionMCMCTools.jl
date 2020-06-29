@@ -52,7 +52,7 @@ draw_proposal_path!(bc::BlockCollection) = draw_proposal_path!.(bc.blocks)
 ===============================================================================#
 
 """
-    accept_reject_proposal_path!(bb::BlockCollection, mcmciter)
+    accept_reject_proposal_path!(bc::BlockCollection, mcmciter)
 
 Accept/reject decision of the Metropolis-Hastings algorithm for the step of path
 imputation, done separately for each block.
