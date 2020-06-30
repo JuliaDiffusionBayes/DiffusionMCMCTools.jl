@@ -1,5 +1,12 @@
 # Inference with blocking with `BiBlock`s
 ****
+
+!!! note "important"
+    Make sure that you read the [preamble](@id tutorials_start) before you start reading this tutorial.
+
+## The algorithm
+---
+
 ```julia
 #↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
 function simple_name_structure_not_last(pname::Symbol, num_obs)
@@ -112,19 +119,16 @@ end
 
 
 ```julia
-using OrderedCollections
-
 θ = OrderedDict(:γ=>1.5)
-
-DD.var_parameter_names(::FitzHughNagumo) = (:γ,)
-DD.var_parameter_names(::FitzHughNagumoAux) = (:γ,)
-
-@load_diffusion FitzHughNagumoAux
 paths, θθ = simple_inference_with_blocking(
     FitzHughNagumoAux, recording, 0.001, FitzHughNagumoAux,
     [[1:25,26:75,76:100],[1:50, 51:100]], θ; ϵ=0.3, ρ=0.96, num_steps=10^4
 )
+```
 
+## Results
+----
+```julia
 plot(getindex.(θθ, 1))
 ```
 ![inference_with_blocking_chain](../../assets/tutorials/biblock/inference_with_blocking_chain.png)

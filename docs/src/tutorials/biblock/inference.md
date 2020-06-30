@@ -1,5 +1,13 @@
 # Inference with `BiBlock`s
 *****
+
+!!! note "important"
+    Make sure that you read the [preamble](@id tutorials_start) before you start reading this tutorial.
+
+Another level of complication to a smoothing algorithm, somewhat orthogonal to blocking is addition of an inference step. Let's forget about blocking for this tutorial (we will come back to it the subsequent tutorial) and focus on inference only.
+
+## The algorithm
+---
 ```julia
 customkernel(θ, scale=0.1) = θ .+ 2.0*scale*(rand()-0.5)
 
@@ -94,6 +102,8 @@ function simple_inference(AuxLaw, recording, dt, _θ; ϵ=0.3, ρ=0.5, num_steps=
 end
 ```
 
+## Results
+----
 ```julia
 plot(getindex.(θθ, 1))
 ```
