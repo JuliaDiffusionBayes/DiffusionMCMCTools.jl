@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Inference with blocking · DiffusionMCMCTools.jl</title><link rel="canonical" href="https://JuliaDiffusionBayes.github.io/DiffusionMCMCTools.jl/tutorials/biblock/inference_with_blocking/"/><link href="https://fonts.googleapis.com/css?family=Lato|Roboto+Mono" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.11.1/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../../assets/documenter.js"></script><script src="../../../siteinfo.js"></script><script src="../../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark"/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../../assets/themeswap.js"></script></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../../"><img src="../../../assets/logo.png" alt="DiffusionMCMCTools.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit">DiffusionMCMCTools.jl</span></div><form class="docs-search" action="../../../search/"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../../">Home</a></li><li><a class="tocitem" href="../../../get_started/overview/">Get started</a></li><li><input class="collapse-toggle" id="menuitem-3" type="checkbox"/><label class="tocitem" for="menuitem-3"><span class="docs-label">User manual</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../manual/sampling_unit/">SamplingUnit</a></li><li><a class="tocitem" href="../../../manual/sampling_pair/">SamplingPair</a></li><li><a class="tocitem" href="../../../manual/sampling_ensemble/">SamplingEnsemble</a></li><li><a class="tocitem" href="../../../manual/block/">Block</a></li><li><a class="tocitem" href="../../../manual/biblock/">BiBlock</a></li><li><a class="tocitem" href="../../../manual/block_collection/">BlockCollection</a></li><li><a class="tocitem" href="../../../manual/block_ensemble/">BlockEnsemble</a></li><li><a class="tocitem" href="../../../manual/param_names_collections/">Containers for parameter names</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4" type="checkbox"/><label class="tocitem" for="menuitem-4"><span class="docs-label">How to...</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../../how_to_guides/under_construction/">...</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5" type="checkbox" checked/><label class="tocitem" for="menuitem-5"><span class="docs-label">Tutorials</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../preamble/">⚠ Preamble ⚠</a></li><li><input class="collapse-toggle" id="menuitem-5-2" type="checkbox" checked/><label class="tocitem" for="menuitem-5-2"><span class="docs-label">BiBlocks</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../smoothing/">Smoothing</a></li><li><a class="tocitem" href="../smoothing_with_blocking/">Smoothing with blocking</a></li><li><a class="tocitem" href="../inference/">Inference</a></li><li class="is-active"><a class="tocitem" href>Inference with blocking</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5-3" type="checkbox"/><label class="tocitem" for="menuitem-5-3"><span class="docs-label">Containers for parameter names</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../pnames/inference_with_biblock/">Inference with BiBlocks</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5-4" type="checkbox"/><label class="tocitem" for="menuitem-5-4"><span class="docs-label">BlockCollection</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../block_collection/inference/">Inference</a></li><li><a class="tocitem" href="../../block_collection/inference_with_blocking/">Inference with blocking</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-5-5" type="checkbox"/><label class="tocitem" for="menuitem-5-5"><span class="docs-label">BlockEnsemble</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../../block_ensemble/inference/">Inference</a></li></ul></li></ul></li><li><a class="tocitem" href="../../../module_index/">Index</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Tutorials</a></li><li><a class="is-disabled">BiBlocks</a></li><li class="is-active"><a href>Inference with blocking</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href>Inference with blocking</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/JuliaDiffusionBayes/DiffusionMCMCTools.jl/blob/master/docs/src/tutorials/biblock/inference_with_blocking.md#L" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Inference-with-blocking-with-BiBlocks-1"><a class="docs-heading-anchor" href="#Inference-with-blocking-with-BiBlocks-1">Inference with blocking with <code>BiBlock</code>s</a><a class="docs-heading-anchor-permalink" href="#Inference-with-blocking-with-BiBlocks-1" title="Permalink"></a></h1><hr/><pre><code class="language-julia">#↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓ ↓
+function simple_name_structure_not_last(pname::Symbol, num_obs)
+    pnames = (
+        PP = _build_struct(num_obs-1, (1=&gt;pname)),
+        P_last = _build_struct(1, (1=&gt;pname)),
+        P_excl = _build_struct(1, (1=&gt;pname)),
+        Pb_excl = _build_struct(num_obs-1, (1=&gt;pname)),
+    )
+end
+
+function simple_name_structure_blocking(pname::Symbol, block_layout)
+    map(block_layout) do block_set
+        map(enumerate(block_set)) do (i, block)
+            (
+                i == length(block_set) ?
+                simple_name_structure(pname, length(block)) :
+                simple_name_structure_not_last(pname, length(block))
+            )
+        end
+    end
+end
+#↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑ ↑
+
+function accept_reject_proposal_param!(B::AbstractArray{&lt;:BiBlock}, mcmciter, θ, θ°)
+    accepted = rand(Exponential(1.0)) &gt; mapreduce(bb-&gt;-(bb.b°.ll - bb.b.ll),+,B)
+    accepted &amp;&amp; swap_XX!.(B)
+    accepted &amp;&amp; swap_PP!.(B)
+    (bb-&gt;save_ll!(bb.b, mcmciter)).(B)
+    (bb-&gt;save_ll!(bb.b°, mcmciter)).(B)
+    accepted &amp;&amp; swap_ll!.(B)
+    accepted, copy(accepted ? θ° : θ)
+end
+
+
+function simple_inference_with_blocking(
+        AuxLaw, recording, dt, AuxLawBlocking, block_layout, _θ;
+        ϵ=0.3, ρ=0.5, num_steps=10^4
+    )
+    # making sure that things are in order...
+    _pname = collect(keys(_θ))
+    # for simplicity restrict to inference for a single param
+    @assert length(_pname) == 1
+    pname = first(_pname)
+    θ = collect(values(_θ))
+
+    # setting the initial guess θ inside the recording
+    OBS.set_parameters!(recording, _θ)
+
+    # setting up containers
+    tts = OBS.setup_time_grids(recording, dt, standard_guid_prop_time_transf)
+    sp = SamplingPair(AuxLaw, recording, tts)
+    blocks = [
+        [
+            BiBlock(sp, br, ρ, i==length(block_ranges), num_steps)
+            for (i,br) in enumerate(block_ranges)
+        ] for block_ranges in block_layout
+    ]
+    name_struct = simple_name_structure_blocking(pname, block_layout)
+
+    paths = []
+
+    θθ = [θ]
+    a_h = Bool[]
+
+    # MCMC
+    for i in 1:num_steps
+        for B in blocks
+            GP.set_obs!.(B)
+            (bb-&gt;recompute_guiding_term!(bb.b)).(B)
+            find_W_for_X!.(B)
+            loglikhd!.(B)
+            draw_proposal_path!.(B)
+            accept_reject_proposal_path!.(B, i)
+
+            # progress message
+            if i % 100 == 0
+                println(
+                    &quot;$i. ll=$(ll_of_accepted.(B, i)), acceptance rate: &quot;,
+                    &quot;$( map(bb-&gt;accpt_rate(bb, (i-99):i), B) )&quot;
+                )
+            end
+        end
+
+        θ° = customkernel(θ, ϵ)
+
+        B = blocks[end]
+        for (idx, bb) in enumerate(B)
+            set_proposal_law!(bb, θ°, name_struct[end][idx], true)
+        end
+        (bb-&gt;recompute_guiding_term!(bb.b°)).(B)
+
+        accpt, θ = accept_reject_proposal_param!(B, i, θ, θ°)
+        push!(θθ, θ)
+        push!(a_h, accpt)
+
+        if i % 100 == 0
+            println(
+                &quot;$i. updt a-r: &quot;,
+                &quot;$(sum(a_h[(i-99):i])/100).&quot;
+            )
+        end
+
+        # save intermediate path for plotting
+        i % 400 == 0 &amp;&amp; append!(paths, [deepcopy(sp.u.XX)])
+    end
+    paths, θθ
+end</code></pre><pre><code class="language-julia">using OrderedCollections
+
+θ = OrderedDict(:γ=&gt;1.5)
+
+DD.var_parameter_names(::FitzHughNagumo) = (:γ,)
+DD.var_parameter_names(::FitzHughNagumoAux) = (:γ,)
+
+@load_diffusion FitzHughNagumoAux
+paths, θθ = simple_inference_with_blocking(
+    FitzHughNagumoAux, recording, 0.001, FitzHughNagumoAux,
+    [[1:25,26:75,76:100],[1:50, 51:100]], θ; ϵ=0.3, ρ=0.96, num_steps=10^4
+)
+
+plot(getindex.(θθ, 1))</code></pre><p><img src="../../../assets/tutorials/biblock/inference_with_blocking_chain.png" alt="inference_with_blocking_chain"/></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../inference/">« Inference</a><a class="docs-footer-nextpage" href="../../pnames/inference_with_biblock/">Inference with BiBlocks »</a></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> on <span class="colophon-date" title="Tuesday 30 June 2020 12:48">Tuesday 30 June 2020</span>. Using Julia version 1.4.2.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
