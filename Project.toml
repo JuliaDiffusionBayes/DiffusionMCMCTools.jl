@@ -11,6 +11,7 @@ ObservationSchemes = "af94d80e-94fa-4c0b-866a-2d8bf15822bc"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
+DiffusionDefinition = "0.1"
 julia = "1.4"
 
 [extras]
