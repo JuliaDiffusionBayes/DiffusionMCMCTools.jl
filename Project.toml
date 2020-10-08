@@ -11,11 +11,11 @@ ObservationSchemes = "af94d80e-94fa-4c0b-866a-2d8bf15822bc"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
-Distributions = "0.23"
 DiffusionDefinition = "0.1"
+Distributions = "0.23, 0.24"
 GuidedProposals = "0.1"
-julia = "1.4"
 ObservationSchemes = "0.1"
+julia = "1.4"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
